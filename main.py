@@ -1,57 +1,85 @@
+import configparser
+from db.database_handler import DatabaseHandler
 from hcm import HCMRecord, HCMHeader
 import csv
-import click
-import datetime
+from datetime import datetime
+from hcm.const import CONFIG, FILETYPE
 
 CSV_DELIMITER = ";"
 CSV_ENCODING = "utf-8-sig"
 
 HCM_FIELD_PREFIX = "field_"
+# every entry/row has to be 219 bytes(characters) long
+LENGHT = 219
+
+test_data = {
+    "filenumber_medium": 2,
+    "filecontent": "SHzgZ3shvZ4unKky3IrN7rgJzW",
+    # "filetype": "O",
+    # "origin_country": "AUT",
+    "email": "ElWSI@example.com",
+    "phone": "08464935133887792",
+    "fax": "4866832259",
+    "person_name": "JoeHeinz",
+    "record_count": 648430,
+    "creation_date": "07032025",
+    # "destination_country": "VPN",
+    # "filenumber": 161,
+}
 
 
-@click.command()
-@click.argument("filename", type=click.Path(exists=True))
-@click.option("output", "-o", required=True, type=click.Path())
-def main(filename, output):
-    data: list[HCMHeader | HCMRecord] = []
-    err_lines = 0
+def main():
+    file_list = ["gsm900"]
+    create_file(file_list[0])
+    # db_handler = DatabaseHandler()
+    # print(db_handler.config["DB"]["user"])
 
-    with open(filename, mode="r", encoding=CSV_ENCODING) as csvfile:
-        reader = csv.DictReader(csvfile, delimiter=CSV_DELIMITER)
-        for idx, row in enumerate(reader, start=1):
-            # Interpret empty values as None (instead of '')
-            row = {k: v if v else None for k, v in row.items()}
-            d = {f"{HCM_FIELD_PREFIX}{k}": v for k, v in row.items()}
-            try:
-                record = HCMRecord(**d)
-                data.append(record)
-            except ValueError as e:
-                l = f"Line {idx}"
-                print(f"{l}\n{'-' * len(l)}\n{e}")
-                err_lines += 1
+    # header = HCMHeader(**test_data)
+    # print(FILETYPE)
+    # # print(header)
+    # header = header.serialize_model()
+    # # print(header)
 
-    # TODO: how to configure the header ...
-    header = HCMHeader(
-        filenumber_medium=1,
-        filenumber=1,
-        fileversion=1.0,
-        filecontent="abc",
-        filetype="O",
-        origin_country="AUT",
-        destination_country="AUT",
-        email="nobody@drei.at",
-        phone="",
-        fax="",
-        person_name="Mr. Nobody",
-        creation_date=f"{datetime.datetime.now():%m%d%Y}",
-        record_count=len(data),
-    )
+    # folder = "output/"
+    # filename = "testkest2"
+    # with open(folder + filename, "w") as file:
+    #     file.write(header)
 
-    with open(output, "w") as f:
-        print(header.model_dump(), file=f, end="")
+    return
 
-        for record in data:
-            print(record.model_dump(), file=f)
+
+def write_to_file(input):
+
+    folder = "output/"
+    filename = "basemodel_test"
+    with open(folder + filename, "w") as file:
+        file.write(input)
+
+
+def get_current_quarter():
+    """Returns current quarter and year in format Q1_2025"""
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    quarter = (month - 1) // 3 + 1
+    return f"Q{quarter}_{year}"
+
+
+def create_file(tech: str):
+    """For multiprocessing. Handles the actual file processing/creation."""
+    db_handler = DatabaseHandler()
+    config = configparser.ConfigParser()
+    config.read(CONFIG)
+    print(tech)
+    print(config["Tables"][tech])
+    result = db_handler.select_from_db(config["Tables"][tech])
+    print(result[0])
+    bobo = HCMRecord(**result[0])
+    data = bobo.serialize_model()
+    header = HCMHeader(**test_data)
+    header = header.serialize_model()
+    write_to_file(header + data)
+    return
 
 
 if __name__ == "__main__":

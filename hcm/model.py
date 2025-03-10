@@ -20,6 +20,7 @@ from hcm.const import (
     KANALBELEGUNG,
     DATASET_LENGTH,
     FILETYPE,
+    COUNTRY,
 )
 
 
@@ -33,18 +34,18 @@ def _stringify(value: str | int | float | None, length: int, fmt: str = "") -> s
 class HCMHeader(BaseModel):
     filenumber_medium: int = Field(lt=100)
     filecontent: str = Field(max_length=80)
-    filetype: FILETYPE
-    origin_country: str = Field(min_length=3, max_length=3)
+    filetype: str = Field(default=FILETYPE)
+    origin_country: str = Field(max_length=3, default=COUNTRY)
     email: str = Field(max_length=40)
     phone: str = Field(max_length=20)
     fax: str = Field(max_length=20)
     person_name: str = Field(max_length=20)
     record_count: int = Field(lt=1000000)
-    creation_date: str = Field(min_length=8, max_length=8)
-    destination_country: str = Field(min_length=3, max_length=3)
-    filenumber: Optional[int] = Field(lt=1000000)
-    fileversion: float = Field(lt=10)
-    _reserved: str = ""
+    creation_date: str = Field(max_length=8)
+    destination_country: str = Field(max_length=3, default=COUNTRY)
+    filenumber: Optional[int] = Field(lt=1000000, default=None)
+    fileversion: float = Field(lt=10, default=1.0)
+    reserved: str = Field(max_length=7, default="")
 
     @model_serializer
     def serialize_model(self) -> str:
@@ -62,58 +63,48 @@ class HCMHeader(BaseModel):
             _stringify(self.destination_country, 3, "<3"),
             _stringify(self.filenumber, 6, "6d"),
             _stringify(self.fileversion, 3, "3.1f"),
-            _stringify(self._reserved, 7, "<7"),
+            _stringify(self.reserved, 7, "<7"),
         ]
 
         header_string = "".join(hcm_header)
 
         if len(header_string) != DATASET_LENGTH:
-            raise ValueError(
-                f"Datensatzlänge falsch. {len(header_string)} != {DATASET_LENGTH}"
-            )
+            raise ValueError(f"Datensatzlänge falsch. {len(header_string)} != {DATASET_LENGTH}")
 
         return header_string
 
 
 class HCMRecord(BaseModel):
-    field_1A: Optional[float] = Field(ge=0, lt=10000)
-    field_XX: UNITS
-    field_1Z: FREQUENZKATEGORIEN
-    field_6A: FUNKSTELLE
-    field_6B: FUNKDIENST
-    field_6Z: BENUTZERKATEGORIEN
-    field_10Z: KANALBELEGUNG
-    field_2C: Optional[str] = Field(min_length=8, max_length=8)
-    field_4A: str = Field(max_length=20)
-    field_4B: str = Field(min_length=3, max_length=3)
-    field_4C: str = Field(
-        min_length=15,
-        max_length=15,
-        pattern=r"^\d{3}(E|W)\d{6}(N|S)\d{4}$",
-    )
-    field_4D: int = Field(le=100000)
-    field_4Z: int = Field(le=9999)
-    field_7A: str = Field(min_length=7, max_length=9)
-    field_8B1: Optional[float] = Field(ge=0, lt=1000)
-    field_8B2: ANTENNENTYP
-    field_9A: Optional[float] = Field(ge=0, lt=360)
-    field_9B: Optional[float] = Field(ge=-90, le=90)
-    field_9D: POLARISIERUNG
-    field_9G: Optional[float] = Field(ge=0, lt=100)
-    field_9Y: int = Field(le=9999)
-    field_9XH: str = Field(min_length=7, max_length=7)
-    field_9XV: str = Field(min_length=7, max_length=7)
-    field_1Y: Optional[float] = Field(ge=0, lt=100000)
-    field_XXX: UNITS
-    field_13Z: Optional[str] = Field(max_length=50)
-    field_13Y: KOORDINIERUNGSSTATUS
-    field_2W: Optional[str] = Field(min_length=0, max_length=8)
-    field_2Z: Optional[str] = Field(min_length=0, max_length=8)
-    field_13X: str = Field(
-        min_length=15,
-        max_length=15,
-        pattern=r"^AUT\d+",
-    )
+    field_1A: Optional[float] = Field(ge=0, lt=10000, validation_alias="1a")
+    field_XX: UNITS = Field(validation_alias="xx")
+    field_1Z: FREQUENZKATEGORIEN = Field(validation_alias="1z")
+    field_6A: FUNKSTELLE = Field(validation_alias="6a")
+    field_6B: FUNKDIENST = Field(validation_alias="6b")
+    field_6Z: BENUTZERKATEGORIEN = Field(validation_alias="6z")
+    field_10Z: KANALBELEGUNG = Field(validation_alias="10z")
+    field_2C: Optional[str] = Field(min_length=8, max_length=8, validation_alias="2c")
+    field_4A: str = Field(max_length=20, validation_alias="4a")
+    field_4B: str = Field(min_length=3, max_length=3, validation_alias="4b")
+    field_4C: str = Field(min_length=15, max_length=15, pattern=r"^\d{3}(E|W)\d{6}(N|S)\d{4}$", validation_alias="4c")
+    field_4D: int = Field(le=100000, validation_alias="4d")
+    field_4Z: int = Field(le=9999, validation_alias="4z")
+    field_7A: str = Field(min_length=7, max_length=9, validation_alias="7a")
+    field_8B1: Optional[float] = Field(ge=0, lt=1000, validation_alias="8b1")
+    field_8B2: ANTENNENTYP = Field(validation_alias="8b2")
+    field_9A: Optional[float] = Field(ge=0, lt=360, validation_alias="9a")
+    field_9B: Optional[float] = Field(ge=-90, le=90, validation_alias="9b")
+    field_9D: POLARISIERUNG = Field(validation_alias="9d")
+    field_9G: Optional[float] = Field(ge=0, lt=100, validation_alias="9g")
+    field_9Y: int = Field(le=9999, validation_alias="9y")
+    field_9XH: str = Field(min_length=7, max_length=7, validation_alias="9xh")
+    field_9XV: str = Field(min_length=7, max_length=7, validation_alias="9xv")
+    field_1Y: Optional[float] = Field(ge=0, lt=100000, validation_alias="1y")
+    field_XXX: UNITS = Field(validation_alias="xxx")
+    field_13Z: Optional[str] = Field(max_length=50, validation_alias="13z")
+    field_13Y: KOORDINIERUNGSSTATUS = Field(validation_alias="13y")
+    field_2W: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2w")
+    field_2Z: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2z")
+    field_13X: str = Field(max_length=15, pattern=r"^AUT\d+", validation_alias="13x")
 
     @model_validator(mode="after")
     def check_1A(self) -> Self:
@@ -196,15 +187,13 @@ class HCMRecord(BaseModel):
             _stringify(self.field_13Y, 1),
             _stringify(self.field_2W, 8, "<8"),
             _stringify(self.field_2Z, 8, "<8"),
-            _stringify(self.field_13X, 15, "<15")
+            _stringify(self.field_13X, 15, "<15"),
             # )
         ]
 
         dataset_string = "".join(hcm_dataset)
 
         if (dataset_length := len(dataset_string)) != DATASET_LENGTH:
-            raise ValueError(
-                f"Datensatzlänge falsch. {dataset_length} != {DATASET_LENGTH}"
-            )
+            raise ValueError(f"Datensatzlänge falsch. {dataset_length} != {DATASET_LENGTH}")
 
         return dataset_string
