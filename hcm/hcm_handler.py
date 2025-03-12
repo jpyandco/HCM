@@ -1,4 +1,6 @@
 from datetime import datetime
+import os
+import zipfile
 from db.database_handler import DatabaseHandler
 from hcm.const import FILEPREFIX
 from hcm.model import HCMHeader, HCMRecord
@@ -23,10 +25,16 @@ class HCMHandler:
     def __init__(self) -> None:
         self.db_handler = DatabaseHandler()
         self.incorrect_dataset = []
+        self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
+
+        # folder path, file name, zip name as init params from gui?
 
     def write_to_file(self, file_name, input):
 
-        folder = "output/"
+        # directory_path = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
+        folder = "output/" + self.dir
+        self.create_dir(folder)
+        folder += "/"
         # filename = "basemodel_test"
         with open(folder + file_name, "w") as file:
             file.write(input)
@@ -34,7 +42,7 @@ class HCMHandler:
         print(f"\nFILE {file_name} written!\n")
 
     def get_current_quarter(self):
-        """Returns current quarter and year in format Q1_2025"""
+        """Returns current quarter and year in format Q1_"""
         now = datetime.now()
         year = now.year
         month = now.month
@@ -67,9 +75,34 @@ class HCMHandler:
                 bobo = HCMRecord(**entry)
                 data += "\n" + bobo.serialize_model()  # "\n" + for testing, to make files more readable
         except Exception as e:
-            # move to class, save in instance variable
-            self.incorrect_dataset.append({entry.get("userlabel"): entry})
+            self.incorrect_dataset.append({entry.get("userlabel"): entry, "error": e})
             print(e)
             print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
 
         return header + data
+
+    def create_dir(self, directory_path):
+        # directory_path = FILEPREFIX + self.get_current_quarter() + datetime.now().year
+
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+            print(f"Directory '{directory_path}' created.")
+        else:
+            print(f"Directory '{directory_path}' already exists.")
+
+    def create_zip(self, directory_path):
+        print(self.dir)
+        print(directory_path)
+        output_file = f"{directory_path}/{self.dir}.zip"
+        with zipfile.ZipFile(output_file, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for file in os.listdir(directory_path):
+                file_path = os.path.join(directory_path, file)
+                if os.path.isfile(file_path) and ".zip" not in file:
+                    zipf.write(file_path, file)
+
+        return
+
+    def create_error_report(self):
+        if self.incorrect_dataset:
+            pass
+        return

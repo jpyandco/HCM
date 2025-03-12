@@ -87,7 +87,7 @@ class HCMRecord(BaseModel):
     field_4B: str = Field(min_length=3, max_length=3, validation_alias="4b")
     field_4C: str = Field(min_length=15, max_length=15, pattern=r"^\d{3}(E|W)\d{6}(N|S)\d{4}$", validation_alias="4c")
     field_4D: int = Field(le=100000, validation_alias="4d")
-    field_4Z: int = Field(le=9999, validation_alias="4z")
+    field_4Z: int = Field(le=9999, validation_alias="4z", default=0)
     field_7A: str = Field(min_length=7, max_length=9, validation_alias="7a")
     field_8B1: Optional[float] = Field(ge=0, lt=1000, validation_alias="8b1")
     field_8B2: ANTENNENTYP = Field(validation_alias="8b2")
@@ -148,7 +148,7 @@ class HCMRecord(BaseModel):
     @model_validator(mode="after")
     def check_9XV(self) -> Self:
         if self.field_9B is None and self.field_9XH != "000ND00":
-            raise ValueError(" Ist 9A leer, so ist 9XH 000ND00")
+            raise ValueError(" Ist 9B leer, so ist 9XV 000ND00")
         return self
 
     @model_validator(mode="after")
