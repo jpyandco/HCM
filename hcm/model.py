@@ -153,7 +153,6 @@ class HCMRecord(BaseModel):
 
     @model_validator(mode="after")
     def check_1Y(self) -> Self:
-        # print("in check_1Y")
         if self.field_1A is None and self.field_1Y is None:
             raise ValueError("1Y muss ausgefüllt werden, wenn 1A nicht ausgefüllt ist.")
         return self
