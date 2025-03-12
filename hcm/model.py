@@ -91,7 +91,7 @@ class HCMRecord(BaseModel):
     field_7A: str = Field(min_length=7, max_length=9, validation_alias="7a")
     field_8B1: Optional[float] = Field(ge=0, lt=1000, validation_alias="8b1")
     field_8B2: ANTENNENTYP = Field(validation_alias="8b2")
-    field_9A: Optional[float] = Field(ge=0, lt=360, validation_alias="9a")
+    field_9A: Optional[float] = Field(ge=0, lt=361, validation_alias="9a")
     field_9B: Optional[float] = Field(ge=-90, le=90, validation_alias="9b")
     field_9D: POLARISIERUNG = Field(validation_alias="9d")
     field_9G: Optional[float] = Field(ge=0, lt=100, validation_alias="9g")
@@ -105,6 +105,7 @@ class HCMRecord(BaseModel):
     field_2W: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2w")
     field_2Z: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2z")
     field_13X: str = Field(max_length=15, pattern=r"^AUT\d+", validation_alias="13x")
+    user_label: Optional[str] = Field
 
     @model_validator(mode="after")
     def check_1A(self) -> Self:
@@ -134,6 +135,8 @@ class HCMRecord(BaseModel):
     def check_9A(self) -> Self:
         if self.field_6A.startswith("M") and self.field_9A is not None:
             raise ValueError("Beginnt 6A mit 'M', ist 9A immer leer.")
+        if self.field_9A == 360:
+            self.field_9A = 359.9
         return self
 
     @model_validator(mode="after")
@@ -150,7 +153,7 @@ class HCMRecord(BaseModel):
 
     @model_validator(mode="after")
     def check_1Y(self) -> Self:
-        print("in check_1Y")
+        # print("in check_1Y")
         if self.field_1A is None and self.field_1Y is None:
             raise ValueError("1Y muss ausgefüllt werden, wenn 1A nicht ausgefüllt ist.")
         return self

@@ -31,6 +31,7 @@ class DatabaseHandler:
             #     print(row)
         except Exception as e:
             print(e)
+            print(f"Error in {tbl}\n")
 
         finally:
             cursor.close()

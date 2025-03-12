@@ -1,6 +1,7 @@
 from typing import Literal
 
 CONFIG = r"C:\Users\bohrnjo\OneDrive - Hutchison Drei Austria GmbH\Documents\Python\HCM\config.ini"
+FILEPREFIX = "H3A_"
 
 DATASET_LENGTH = 219
 FILETYPE = "O"
