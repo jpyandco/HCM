@@ -72,18 +72,19 @@ class GUI:
         self.fax_entry.grid(row=3, column=1, pady=5)
         self.fax_entry.insert(0, self.header_defaults.get("fax"))
 
-        ttk.Button(self.root, text="Submit", command=lambda: self.start_file_creation("headers")).grid(
-            row=5, columnspan=6, pady=5
+        ttk.Button(self.root, text="Start File creation", command=lambda: self.start_file_creation()).grid(
+            row=5, columnspan=2, pady=5
         )
         ttk.Button(self.root, text="Set Headers as default", command=lambda: self.set_headers_as_default()).grid(
-            row=5, columnspan=6, pady=5, column=2
+            row=5, columnspan=4, pady=5, column=2
         )
-        # print(fax_entry.get())
-        # headers = HCMCustomizableHeaders(
-        #     person=name_entry.get(), phone=phone_entry.get(), email=email_entry.get(), fax=fax_entry.get()
-        # )
-        print(self.fax_entry.get())
 
-    def start_file_creation(self, headers: HCMCustomizableHeaders):
+    def start_file_creation(self):
+        headers = HCMCustomizableHeaders(
+            person=self.name_entry.get(),
+            phone=self.phone_entry.get(),
+            email=self.email_entry.get(),
+            fax=self.fax_entry.get(),
+        )
         hcm_handler = HCMHandler(headers.model_dump())
         hcm_handler.process()
