@@ -1,4 +1,4 @@
-### Prerequisists
+### Prerequisites
 Data for HCM Data is stored in a Oracle Databse.
 Each technology has to have its own table.  
 Tables can have additional fields only "userlabel" is used as unique identifier for error reporting and thus mandatory to have in table.  
