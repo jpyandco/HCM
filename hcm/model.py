@@ -36,6 +36,13 @@ def convert_errors(e: ValidationError):
     pass
 
 
+class HCMCustomizableHeaders(BaseModel):
+    person: str
+    phone: str
+    fax: str
+    email: str
+
+
 class HCMHeader(BaseModel):
     filenumber_medium: int = Field(lt=100)
     filecontent: str = Field(max_length=80)
@@ -44,13 +51,13 @@ class HCMHeader(BaseModel):
     email: str = Field(max_length=40)
     phone: str = Field(max_length=20)
     fax: str = Field(max_length=20)
-    person_name: str = Field(max_length=20)
+    person: str = Field(max_length=20)
     record_count: int = Field(lt=1000000)
     creation_date: str = Field(max_length=8)
     destination_country: str = Field(max_length=3, default=COUNTRY)
     filenumber: Optional[int] = Field(lt=1000000, default=None)
     fileversion: float = Field(lt=10, default=1.0)
-    reserved: str = Field(max_length=7, default="")
+    reserved: Optional[str] = Field(max_length=7, default="")
 
     @model_serializer
     def serialize_model(self) -> str:
@@ -62,7 +69,7 @@ class HCMHeader(BaseModel):
             _stringify(self.email, 40, "<40"),
             _stringify(self.phone, 20, "<20"),
             _stringify(self.fax, 20, "<20"),
-            _stringify(self.person_name, 20, "<20"),
+            _stringify(self.person, 20, "<20"),
             _stringify(self.record_count, 6, "6d"),
             _stringify(self.creation_date, 8, "<8"),
             _stringify(self.destination_country, 3, "<3"),

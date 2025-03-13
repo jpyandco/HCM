@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from db.database_handler import DatabaseHandler
+from gui.gui import GUI
 from hcm import HCMRecord, HCMHeader
 from datetime import datetime
 from hcm.const import CONFIG, FILEPREFIX, FILETYPE
@@ -16,8 +17,10 @@ LENGHT = 219
 def main():
 
     try:
-        hcm_handler = HCMHandler()
-        hcm_handler.process()
+        gui_handler = GUI()
+        gui_handler.start_gui()
+        # hcm_handler = HCMHandler()
+        # hcm_handler.process()
 
     except Exception as e:
         print(e)

@@ -26,9 +26,10 @@ test_data = {
 
 
 class HCMHandler:
-    def __init__(self) -> None:
+    def __init__(self, file_headers: dict) -> None:
         self.db_handler = DatabaseHandler()
         self.incorrect_dataset = []
+        self.file_headers = file_headers
 
         self.prefix_dir = "output/"
         self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
@@ -126,13 +127,18 @@ class HCMHandler:
 
         # later header is user input
         # save standard values in config?
-        test_data["record_count"] = record_count
-        test_data["creation_date"] = datetime.now().strftime("%d%m%Y")
-        test_data["filenumber_medium"] = self.file_number
-        test_data["filecontent"] = file_name
+        headers = self.file_headers
+        headers["record_count"] = record_count
+        headers["creation_date"] = datetime.now().strftime("%d%m%Y")
+        headers["filenumber_medium"] = self.file_number
+        headers["filecontent"] = file_name
 
-        header = HCMHeader(**test_data)
+        print(headers)
+
+        header = HCMHeader(**headers)
         header = header.serialize_model()
+
+        print(headers)
 
         # return header + data & incorrect_dataset? better for multiproc
         # return {data: header + data, incorrect_dataset: incorrect_dataset}
