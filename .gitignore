@@ -1,5 +1,5 @@
 #custom
-*.ini
+config.ini
 output/
 
 # Byte-compiled / optimized / DLL files

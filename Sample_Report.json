@@ -1,0 +1,64 @@
+{
+    "Successfully created records": 12345,
+    "Incorrect records": 1,
+    "Errors": [
+        {
+            "190042A0128": {
+                "latitude": 12.111111,
+                "longitude": 12.111111,
+                "site_id": "id",
+                "technology": "GSM",
+                "cell-id": "123",
+                "channel": "123",
+                "power": null,
+                "outdoor": "TRUE",
+                "enduser": "TRUE",
+                "actual_control": "TRUE",
+                "radio": "ZTE",
+                "antenna": "Indoor",
+                "active_sharing": null,
+                "sharing_partner": null,
+                "1a": "1234",
+                "xx": "M",
+                "1z": 1,
+                "6a": "FB",
+                "6b": "CP",
+                "6z": "L",
+                "10z": 1,
+                "2c": "56789",
+                "4a": "address",
+                "4b": "AUT",
+                "4c": "010E11111N1111",
+                "4d": 0,
+                "4z": null,
+                "7a": "200KG7WEF",
+                "8b1": 18,
+                "8b2": "I",
+                "9a": 0,
+                "9b": 0.0,
+                "9d": "M",
+                "9g": 2.0,
+                "9y": 5,
+                "9xh": "000ND00",
+                "9xv": "000ND00",
+                "1y": "1234",
+                "xxx": "M",
+                "13z": "2                                                 ",
+                "13y": "B",
+                "2w": null,
+                "2z": null,
+                "13x": "AUT1234567",
+                "userlabel": "190042A0128",
+                "antennatype": "Indoor",
+                "coveragearea": "Macro"
+            },
+            "table": "table_gsm1800",
+            "Error": [
+                {
+                    "Message": "Input should be a valid integer, given value from type None",
+                    "Fields": "4z"
+                }
+            ]
+        }
+    ]
+}
