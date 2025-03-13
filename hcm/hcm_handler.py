@@ -2,6 +2,8 @@ from configparser import ConfigParser
 from datetime import datetime
 import os
 import zipfile
+
+from pydantic import ValidationError
 from db.database_handler import DatabaseHandler
 from hcm.const import CONFIG, FILEPREFIX
 from hcm.model import HCMHeader, HCMRecord
@@ -50,6 +52,7 @@ class HCMHandler:
 
             # hcm_handler = HCMHandler()
             self.create_dir(self.dir_path)
+            # pass file_numer to create_file for multiproc
             for table, entry in zip(tables, tech):
                 file_name = self.get_file_name(entry)
                 data = self.create_file(table, file_name)
@@ -110,8 +113,14 @@ class HCMHandler:
                 data += "\n" + record.serialize_model()  # "\n" + for testing, to make files more readable
                 self.total_records += 1
                 record_count += 1
+
+        except ValidationError as e:
+            lst = self.format_exception(e)
+
+            self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": lst})
+            print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
         except Exception as e:
-            self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "error": str(e)})
+            self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": str(e)})
             print(e)
             print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
 
@@ -125,6 +134,8 @@ class HCMHandler:
         header = HCMHeader(**test_data)
         header = header.serialize_model()
 
+        # return header + data & incorrect_dataset? better for multiproc
+        # return {data: header + data, incorrect_dataset: incorrect_dataset}
         return header + data
 
     def create_dir(self, directory_path):
@@ -158,3 +169,18 @@ class HCMHandler:
 
         with open(self.report_file, "w") as file:
             json.dump(report_msg, file, indent=4)
+
+    def format_exception(self, e: ValidationError):
+        err_list = e.errors()
+        lst = []
+        for error in err_list:
+            dic = {"Message": error.get("msg") + f", given value from type {str(error.get("input"))}"}
+            print("error object", error)
+            fields = error.get("loc")
+            if len(fields) > 1:
+                dic["Fields"] = fields[0]
+            else:
+                dic["Fields"] = ", ".join(fields)
+            lst.append(dic)
+
+        return lst

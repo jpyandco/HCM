@@ -25,10 +25,15 @@ from hcm.const import (
 
 
 def _stringify(value: str | int | float | None, length: int, fmt: str = "") -> str:
+    """Returns values in given format. Also handles required length per field. Empty space is filled with 0 or whitespace"""
     if value is not None:
         return f"{value:{fmt}}"
     else:
         return " " * length
+
+
+def convert_errors(e: ValidationError):
+    pass
 
 
 class HCMHeader(BaseModel):
