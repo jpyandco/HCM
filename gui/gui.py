@@ -3,7 +3,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 
 from hcm.const import CONFIG
-from hcm.hcm_handler import HCMHandler
+from hcm.hcm_handler_current import HCMHandlerCurrent
 from hcm.model import HCMCustomizableHeaders
 
 
@@ -53,22 +53,22 @@ class GUI:
     def headers_form(self):
         print(self.header_defaults)
         ttk.Label(self.root, text="Name:").grid(row=0, column=0)
-        self.name_entry = tk.Entry(self.root)
+        self.name_entry = ttk.Entry(self.root)
         self.name_entry.grid(row=0, column=1, pady=5)
         self.name_entry.insert(0, self.header_defaults.get("person"))
 
         ttk.Label(self.root, text="Phone:").grid(row=1, column=0)
-        self.phone_entry = tk.Entry(self.root)
+        self.phone_entry = ttk.Entry(self.root)
         self.phone_entry.grid(row=1, column=1, pady=5)
         self.phone_entry.insert(0, self.header_defaults.get("phone"))
 
         ttk.Label(self.root, text="Email:").grid(row=2, column=0)
-        self.email_entry = tk.Entry(self.root)
+        self.email_entry = ttk.Entry(self.root)
         self.email_entry.grid(row=2, column=1, pady=5)
         self.email_entry.insert(0, self.header_defaults.get("email"))
 
         ttk.Label(self.root, text="Fax:").grid(row=3, column=0)
-        self.fax_entry = tk.Entry(self.root)
+        self.fax_entry = ttk.Entry(self.root)
         self.fax_entry.grid(row=3, column=1, pady=5)
         self.fax_entry.insert(0, self.header_defaults.get("fax"))
 
@@ -86,5 +86,11 @@ class GUI:
             email=self.email_entry.get(),
             fax=self.fax_entry.get(),
         )
-        hcm_handler = HCMHandler(headers.model_dump())
+        hcm_handler = HCMHandlerCurrent(headers.model_dump())
+        self.progress_label = ttk.Label(self.root, text="File creation started!")
+        self.progress_label.grid(row=8, column=1, pady=5)
         hcm_handler.process()
+        if hcm_handler.incorrect_dataset:
+            self.progress_label = ttk.Label(self.root, text="File creation finished with errors!")
+        else:
+            self.progress_label = ttk.Label(self.root, text="File creation finished successfully!")

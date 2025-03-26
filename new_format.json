@@ -1,0 +1,100 @@
+{
+    "headers": {
+        "file_number": 1,
+        "file_content": "",
+        "file_content_identifier": "O",
+        "origin_country": "AUT",
+        "email": "",
+        "phone": "",
+        "fax": "",
+        "responsible_person_name": "",
+        "number_of_records": 1123,
+        "creation_date": "22112000 TTMMJJJJ",
+        "destination_country": "AUT",
+        "unique_file_number": null,
+        "file_version": 1.0
+    },
+    "entries": [
+        {
+            "variant1": "",
+            "transmission_frequency": "1A P1, either filled or 1Y filled",
+            "frequency_unit": "1A P2",
+            "frequency_category": "1Z, if A1 related to A1, else related to 1Y",
+            "radio_station_type": "6A",
+            "radio_service_type": "6B",
+            "user_category": "6Z",
+            "channel_occupancy": "10Z, 0/1 valid values",
+            "commissoning_date": "2C",
+            "radio_station_name": "4A",
+            "country": "4B AUT",
+            "coordinates": "4C possibly split for longitude/latitude",
+            "radius": "4D",
+            "height": "4Z",
+            "emission_type": "7A split?",
+            "max_radiated_power": "8B1 depends/related to A1",
+            "reference_antenna_type": "8B2 depends/related on either 8B1 and/or 9G",
+            "azimuth_direction": "9A depends 6A and 9XH",
+            "mechanical_elevation_angle": "9B depends/related on 9XV",
+            "polarization": "9D value = M",
+            "antenna_gain": "9G depends/related to 1Y, 8B2, 9A, 9B, 9XH, 9XV",
+            "antenna_height": "9Y",
+            "antenna_type_horizontal": "9XH",
+            "antenna_type_vertical": "9XV",
+            "transmission_frequency_receiving_station": "1Y P1",
+            "frequency_unit_station": "1Y P2",
+            "remarks": "13Z",
+            "coordination_status": "13Y values P or B",
+            "coordination_request_date": "2W DDMMYYYY",
+            "coordination_request_end_date": "2Z DDMMYYYY can be empty",
+            "coordination_reference": "13X should be a unique identifier"
+        },
+        {
+            "variant2": "",
+            "radio_station": {
+                "transmission_frequency": "1A P1, either filled or 1Y filled",
+                "frequency_unit": "1A P2",
+                "frequency_category": "1Z, if A1 related to A1, else related to 1Y",
+                "station_type": "6A",
+                "service_type": "6B",
+                "user_category": "6Z",
+                "channel_occupancy": "10Z, 0/1 valid values",
+                "commissoning_date": "2C",
+                "station_name": "4A",
+                "country": "4B AUT",
+                "coordinates": "4C possibly split for longitude/latitude",
+                "radius": "4D",
+                "height": "4Z",
+                "emission_type": "7A split?",
+                "max_radiated_power": "8B1 depends/related to A1",
+                "reference_antenna_type": "8B2 depends/related on either 8B1 and/or 9G",
+                "azimuth_direction": "9A depends 6A and 9XH",
+                "mechanical_elevation_angle": "9B depends/related on 9XV",
+                "polarization": "9D value = M"
+            },
+            "antenna": {
+                "gain": "9G depends/related to 1Y, 8B2, 9A, 9B, 9XH, 9XV",
+                "height": "9Y",
+                "type_horizontal": "9XH",
+                "type_vertical": "9XV"
+            },
+            "reciever_station": {
+                "transmission_frequency": "1Y P1",
+                "frequency_unit": "1Y P2"
+            },
+            "remarks": {
+                "Field": "13Z",
+                "tech_gen": "2,3,4,5",
+                "cell_identity": "depends on tech, either 4 or 5G in hexadecimal",
+                "installation_class": "",
+                "location": "I/O (Indoor or outdoor)",
+                "extra": ""
+            },
+            "coordination": {
+                "coordination_status": "13Y values P or B",
+                "coordination_request_date": "2W DDMMYYYY",
+                "coordination_request_end_date": "2Z DDMMYYYY can be empty",
+                "coordination_reference": "13X should be a unique identifier"
+            }
+        }
+    ]
+}

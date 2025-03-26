@@ -6,7 +6,7 @@ import zipfile
 from pydantic import ValidationError
 from db.database_handler import DatabaseHandler
 from hcm.const import CONFIG, FILEPREFIX
-from hcm.model import HCMHeader, HCMRecord
+from hcm.model import Antenna, Coordination, HCMHeader, HCMRecord, RadioStation, ReceiverStation, Remarks
 import json
 
 test_data = {
@@ -25,7 +25,7 @@ test_data = {
 }
 
 
-class HCMHandler:
+class HCMHandlerCurrent:
     def __init__(self, file_headers: dict) -> None:
         self.db_handler = DatabaseHandler()
         self.incorrect_dataset = []
@@ -51,7 +51,6 @@ class HCMHandler:
                 tech.append(k)
                 tables.append(v)
 
-            # hcm_handler = HCMHandler()
             self.create_dir(self.dir_path)
             # pass file_numer to create_file for multiproc
             for table, entry in zip(tables, tech):
@@ -100,7 +99,7 @@ class HCMHandler:
 
         return name
 
-    def create_file(self, table: str, file_name: str, header=None) -> str:
+    def create_file(self, table: str, file_name: str) -> str:
         """For multiprocessing. Handles the actual file processing/creation."""
 
         result = self.db_handler.select_from_db(table)
@@ -125,8 +124,6 @@ class HCMHandler:
             print(e)
             print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
 
-        # later header is user input
-        # save standard values in config?
         headers = self.file_headers
         headers["record_count"] = record_count
         headers["creation_date"] = datetime.now().strftime("%d%m%Y")

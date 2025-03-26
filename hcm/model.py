@@ -2,6 +2,7 @@ from typing import Optional, Self, Type, Any
 
 from pydantic import (
     BaseModel,
+    field_validator,
     model_serializer,
     model_validator,
     Field,
@@ -117,7 +118,7 @@ class HCMRecord(BaseModel):
     field_2W: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2w")
     field_2Z: Optional[str] = Field(min_length=0, max_length=8, validation_alias="2z")
     field_13X: str = Field(max_length=15, pattern=r"^AUT\d+", validation_alias="13x")
-    user_label: Optional[str] = Field
+    user_label: Optional[str] = Field(validation_alias="userlabel")
 
     @model_validator(mode="after")
     def check_1A(self) -> Self:
@@ -171,6 +172,7 @@ class HCMRecord(BaseModel):
 
     @model_serializer
     def serialize_model(self) -> str:
+        """Can be disregarded, when converting to "New" HCM format."""
         hcm_dataset = [
             _stringify(self.field_1A, 11, "011.5f"),
             _stringify(self.field_XX, 1),
@@ -211,3 +213,81 @@ class HCMRecord(BaseModel):
             raise ValueError(f"Datensatzlänge falsch. {dataset_length} != {DATASET_LENGTH}")
 
         return dataset_string
+
+
+class RadioStation(BaseModel):
+    object_name: str = Field(default="radio_station", exclude=True)
+    transmission_frequency: float = Field(validation_alias="field_1A")
+    frequency_unit: str = Field(validation_alias="field_XX")
+    frequency_category: int = Field(validation_alias="field_1Z")
+    station_type: str = Field(validation_alias="field_6A")
+    service_type: str = Field(validation_alias="field_6B")
+    user_category: str = Field(validation_alias="field_6Z")
+    channel_occupancy: int = Field(validation_alias="field_10Z")
+    commissioning_date: str = Field(validation_alias="field_2C")
+    station_name: str = Field(validation_alias="field_4A")
+    country: str = Field(validation_alias="field_4B")
+    coordinates: str = Field(validation_alias="field_4C")
+    radius: int = Field(validation_alias="field_4D")
+    height: int = Field(validation_alias="field_4Z")
+    emission_type: str = Field(validation_alias="field_7A")
+    max_radiated_power: float = Field(validation_alias="field_8B1")
+    reference_antenna_type: str = Field(validation_alias="field_8B2")
+    azimuth_direction: float = Field(validation_alias="field_9A")
+    mechanical_elevation_angle: float = Field(validation_alias="field_9B")
+    polarization: str = Field(validation_alias="field_9D")
+
+
+class Antenna(BaseModel):
+    object_name: str = Field(default="antenna", exclude=True)
+    gain: float = Field(validation_alias="field_9G")
+    height: int = Field(validation_alias="field_9Y")
+    type_horizontal: str = Field(validation_alias="field_9XH")
+    type_vertical: str = Field(validation_alias="field_9XV")
+
+
+class ReceiverStation(BaseModel):
+    object_name: str = Field(default="reciever_station", exclude=True)
+    transmission_frequency: float = Field(validation_alias="field_1Y")
+    frequency_unit: str = Field(validation_alias="field_XXX")
+
+
+class Remarks(BaseModel):
+    object_name: str = Field(default="remarks", exclude=True)
+    # TODO logic for splitting based on hcm docu
+    # field: str = Field(validation_alias="field_13Z")
+    tech_gen: Optional[str] = Field(validation_alias="field_13Z", default=None)
+    cell_identity: Optional[str] = Field(default=None)
+    installation_class: Optional[str] = Field(default=None)
+    location: Optional[str] = Field(default=None)
+    extra: Optional[str] = Field(default=None)
+
+    @model_validator(mode="after")
+    def validate_fields(cls, values: "Remarks"):
+        """Split string from Field 13Z into respective fields. field_list values are from HCM Docu "Zusatzerklärung zu Feld 13Z"."""
+        value = values.tech_gen
+        # s = value
+        field_list = [1, 9, 2, 1, 36]
+        results = []
+        starts = 0
+        # TODO fix bug
+        for length in field_list:
+            results.append(value[starts : starts + length])
+            starts += length
+        print(results)
+
+        values.tech_gen = results[0]
+        values.cell_identity = results[1].strip()
+        values.installation_class = results[2].strip()
+        values.location = results[3].strip()
+        values.extra = results[4].strip()
+
+        return values
+
+
+class Coordination(BaseModel):
+    object_name: str = Field(default="coordination", exclude=True)
+    status: str = Field(validation_alias="field_13Y")
+    request_date: str | None = Field(validation_alias="field_2W", default=None)
+    request_end_date: str | None = Field(validation_alias="field_2Z", default=None)
+    reference: str = Field(validation_alias="field_13X")
