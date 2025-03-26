@@ -13,7 +13,7 @@ class DatabaseHandler:
         self.pwd = self.config["DB"]["pwd"]
         self.dsn = self.config["DB"]["dsn"]
 
-    def select_from_db(self, tbl) -> dict:
+    def select_from_db(self, tbl) -> list[dict]:
         sql = f"select * from {tbl}"
         formatted_rows = None
 

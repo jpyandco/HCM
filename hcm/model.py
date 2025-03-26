@@ -224,7 +224,7 @@ class RadioStation(BaseModel):
     service_type: str = Field(validation_alias="field_6B")
     user_category: str = Field(validation_alias="field_6Z")
     channel_occupancy: int = Field(validation_alias="field_10Z")
-    commissioning_date: str = Field(validation_alias="field_2C")
+    commissioning_date: Optional[str] = Field(validation_alias="field_2C", default=None)
     station_name: str = Field(validation_alias="field_4A")
     country: str = Field(validation_alias="field_4B")
     coordinates: str = Field(validation_alias="field_4C")
@@ -274,7 +274,7 @@ class Remarks(BaseModel):
         for length in field_list:
             results.append(value[starts : starts + length])
             starts += length
-        print(results)
+        #print(results)
 
         values.tech_gen = results[0]
         values.cell_identity = results[1].strip()

@@ -1,43 +1,70 @@
-import datetime
+from configparser import ConfigParser
+from datetime import datetime
 import json
 from pydantic import ValidationError
 
 from db.database_handler import DatabaseHandler
-from hcm.const import FILEPREFIX
-from hcm.model import Antenna, Coordination, HCMRecord, RadioStation, ReceiverStation, Remarks
+from hcm.const import CONFIG, FILEPREFIX
+from hcm.hcm_handler import HCMHandler
+from hcm.model import Antenna, Coordination, HCMHeader, HCMRecord, RadioStation, ReceiverStation, Remarks
 
 # TODO create HCMHanlderBaseclass and inherit to this class and old hcm_handler
 
 
-class HCMHandlerNew:
+class HCMHandlerNew(HCMHandler):
     def __init__(self, file_headers: dict) -> None:
-        self.db_handler = DatabaseHandler()
-        self.incorrect_dataset = []
-        self.file_headers = file_headers
+        super().__init__(file_headers)
 
-        self.prefix_dir = "output/"
-        self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        self.report_file = self.dir_path + "/" + "Report.json"
-        self.total_records: int = 0
-        self.file_number: int = 0
+    def process(self):
+        try:
+            config = ConfigParser()
+            config.read(CONFIG)
+            tech = []
+            tables = []
 
-    def new_format(self, table: str, file_name, result: list[dict]):
+            for k, v in config.items("Tables"):
+                tech.append(k)
+                tables.append(v)
+
+            self.create_dir(self.dir_path)
+            # pass file_numer to create_file for multiproc
+            for table, entry in zip(tables, tech):
+                file_name = self.get_file_name(entry)
+                result = self.db_handler.select_from_db(table)
+                # print("DB DATA:", result)
+                data = self.new_format(table, file_name, result)
+                # print("DATA: ", data)
+                self.write_to_file_new(file_name, data)
+
+            incorrect_data = self.incorrect_dataset
+
+            print(f"Incorrect Datasets: {len(incorrect_data)}\n")
+            for data in self.incorrect_dataset:
+                # print(data, "\n")
+                pass
+
+            self.create_zip()
+            self.create_report()
+
+        except Exception as e:
+            print(e)
+
+    def new_format(self, table: str, file_name: str, data: list[dict]):
         # result = self.db_handler.select_from_db(table)
         # move out of func and pass as parameter
 
-        data = ""
+        # data = ""
         record_count = 0
         self.file_number += 1
         records = []
-        print("results", result)
-        try:
-            for entry in result:
-                # print("entry", entry)
+        complete_data = None
+        # print("results", data)
+
+        for entry in data:
+            try:
                 record = HCMRecord(**entry)
-                # data += "\n" +
                 validated_record = dict(record)
-                print(validated_record)
+                # print(validated_record)
                 radio_station = RadioStation(**validated_record)
                 antenna = Antenna(**validated_record)
                 reciever_station = ReceiverStation(**validated_record)
@@ -54,36 +81,44 @@ class HCMHandlerNew:
                 }
 
                 records.append(dic)
-                print(dic)
 
-        except ValidationError as e:
-            # lst = self.format_exception(e)
+            except ValidationError as e:
+                lst = self.format_exception(e)
 
-            # self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": lst})
-            print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
-            print("validated_record", validated_record)
-        except Exception as e:
-            self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": str(e)})
-            print(e)
-            print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")  #
-            print("validated_record", validated_record)
+                self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": lst})
+                print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
+                print("validated_record", validated_record)
+            except Exception as e:
+                self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": str(e)})
+                print(e)
+                print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")  #
+                print("validated_record", validated_record)
+                # print(dic)
 
-        # headers = self.file_headers
-        # headers["record_count"] = record_count
-        # headers["creation_date"] = datetime.now().strftime("%d%m%Y")
-        # headers["filenumber_medium"] = self.file_number
-        # headers["filecontent"] = file_name
+        header = self.create_headers(file_name, record_count)
+        print("HEADER:", header)
+        complete_data = {"header": header, "content": records}
+
+        return complete_data
+
+    def create_headers(self, file_name, record_count):
+        headers = self.file_headers
+        headers["record_count"] = record_count
+        headers["creation_date"] = datetime.now().strftime("%d%m%Y")
+        headers["filenumber_medium"] = self.file_number
+        headers["filecontent"] = file_name
 
         # print(headers)
 
-        # header = HCMHeader(**headers)
-        # header = header.serialize_model()
-        return records
+        header = HCMHeader(**headers)
+        header = dict(header)
 
-    def write_to_file_new(self, file_name, input):
+        return header
+
+    def write_to_file_new(self, file_name, data: dict):
         folder = self.dir_path + "/"
 
-        with open(folder + file_name, "w") as file:
-            file.write(json.dumps(input, indent=4))
+        with open(folder + file_name + ".json", "w") as file:
+            file.write(json.dumps(data, indent=4))
 
         print(f"\nFILE {file_name} written!\n")
