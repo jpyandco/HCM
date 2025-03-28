@@ -32,9 +32,11 @@ class HCMHandlerNew(HCMHandler):
                 file_name = self.get_file_name(entry)
                 result = self.db_handler.select_from_db(table)
                 # print("DB DATA:", result)
+                headers = self.create_headers(file_name)
                 data = self.new_format(table, file_name, result)
+                complete_data = {"header": headers, "content": data}
                 # print("DATA: ", data)
-                self.write_to_file_new(file_name, data)
+                self.write_to_file_new(file_name, complete_data)
 
             incorrect_data = self.incorrect_dataset
 
@@ -49,12 +51,12 @@ class HCMHandlerNew(HCMHandler):
         except Exception as e:
             print(e)
 
-    def new_format(self, table: str, file_name: str, data: list[dict]):
+    def new_format(self, table: str, data: list[dict]):
         # result = self.db_handler.select_from_db(table)
         # move out of func and pass as parameter
 
         # data = ""
-        record_count = 0
+        self.record_count = 0
         self.file_number += 1
         records = []
         complete_data = None
@@ -75,7 +77,7 @@ class HCMHandlerNew(HCMHandler):
                 coordination = Coordination(**validated_record)
                 remarks = Remarks(**validated_record)
                 self.total_records += 1
-                record_count += 1
+                self.record_count += 1
                 dic = {
                     radio_station.object_name: radio_station.model_dump(),
                     antenna.object_name: antenna.model_dump(),
@@ -91,23 +93,21 @@ class HCMHandlerNew(HCMHandler):
 
                 self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": lst})
                 print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
-                print("validated_record", validated_record)
             except Exception as e:
                 self.incorrect_dataset.append({entry.get("userlabel"): entry, "table": table, "Error": str(e)})
                 print(e)
                 print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")  #
-                print("validated_record", validated_record)
                 # print(dic)
 
-        header = self.create_headers(file_name, record_count)
-        print("HEADER:", header)
-        complete_data = {"header": header, "content": records}
+        # header = self.create_headers(file_name, self.record_count)
+        # print("HEADER:", header)
+        # complete_data = {"header": header, "content": records}
 
-        return complete_data
+        return records
 
-    def create_headers(self, file_name, record_count):
+    def create_headers(self, file_name):
         headers = self.file_headers
-        headers["record_count"] = record_count
+        headers["record_count"] = self.record_count
         headers["creation_date"] = datetime.now().strftime("%d%m%Y")
         headers["filenumber_medium"] = self.file_number
         headers["filecontent"] = file_name

@@ -1,4 +1,5 @@
 from configparser import ConfigParser
+import threading
 import tkinter as tk
 import ttkbootstrap as ttk
 
@@ -87,7 +88,7 @@ class GUI:
             row=5, columnspan=2, column=0, padx=5, pady=5, sticky="w"
         )
         ttk.Button(
-            self.root, text="Start File creation in new format", command=lambda: self.start_file_creation_new()
+            self.root, text="Start File creation in new format", command=lambda: self.button_file_creation_new()
         ).grid(row=7, columnspan=2, padx=5, column=0, pady=5, sticky="w")
 
     def start_file_creation(self):
@@ -105,6 +106,10 @@ class GUI:
             self.progress_label = ttk.Label(self.root, text="File creation finished with errors!")
         else:
             self.progress_label = ttk.Label(self.root, text="File creation finished successfully!")
+
+    def button_file_creation_new(self):
+        thread = threading.Thread(target=self.start_file_creation_new())
+        thread.start()
 
     def start_file_creation_new(self):
         headers = HCMCustomizableHeaders(
