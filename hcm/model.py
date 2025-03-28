@@ -217,7 +217,7 @@ class HCMRecord(BaseModel):
 
 class RadioStation(BaseModel):
     object_name: str = Field(default="radio_station", exclude=True)
-    transmission_frequency: float = Field(validation_alias="field_1A")
+    transmission_frequency: float | None = Field(validation_alias="field_1A")
     frequency_unit: str = Field(validation_alias="field_XX")
     frequency_category: int = Field(validation_alias="field_1Z")
     station_type: str = Field(validation_alias="field_6A")
@@ -231,16 +231,16 @@ class RadioStation(BaseModel):
     radius: int = Field(validation_alias="field_4D")
     height: int = Field(validation_alias="field_4Z")
     emission_type: str = Field(validation_alias="field_7A")
-    max_radiated_power: float = Field(validation_alias="field_8B1")
+    max_radiated_power: float | None = Field(validation_alias="field_8B1")
     reference_antenna_type: str = Field(validation_alias="field_8B2")
-    azimuth_direction: float = Field(validation_alias="field_9A")
-    mechanical_elevation_angle: float = Field(validation_alias="field_9B")
+    azimuth_direction: float | None = Field(validation_alias="field_9A")
+    mechanical_elevation_angle: float | None = Field(validation_alias="field_9B")
     polarization: str = Field(validation_alias="field_9D")
 
 
 class Antenna(BaseModel):
     object_name: str = Field(default="antenna", exclude=True)
-    gain: float = Field(validation_alias="field_9G")
+    gain: float | None = Field(validation_alias="field_9G")
     height: int = Field(validation_alias="field_9Y")
     type_horizontal: str = Field(validation_alias="field_9XH")
     type_vertical: str = Field(validation_alias="field_9XV")
@@ -248,7 +248,7 @@ class Antenna(BaseModel):
 
 class ReceiverStation(BaseModel):
     object_name: str = Field(default="reciever_station", exclude=True)
-    transmission_frequency: float = Field(validation_alias="field_1Y")
+    transmission_frequency: float | None = Field(validation_alias="field_1Y")
     frequency_unit: str = Field(validation_alias="field_XXX")
 
 
@@ -274,7 +274,7 @@ class Remarks(BaseModel):
         for length in field_list:
             results.append(value[starts : starts + length])
             starts += length
-        #print(results)
+        # print(results)
 
         values.tech_gen = results[0]
         values.cell_identity = results[1].strip()

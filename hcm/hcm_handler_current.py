@@ -106,10 +106,14 @@ class HCMHandlerCurrent:
         data = ""
         record_count = 0
         self.file_number += 1
+        unique_id = []
 
         try:
             for entry in result:
                 record = HCMRecord(**entry)
+                if record.field_13X in unique_id:
+                    continue
+                unique_id.append(record.field_13X)
                 data += "\n" + record.serialize_model()  # "\n" + for testing, to make files more readable
                 self.total_records += 1
                 record_count += 1

@@ -58,12 +58,16 @@ class HCMHandlerNew(HCMHandler):
         self.file_number += 1
         records = []
         complete_data = None
+        unique_id = []
         # print("results", data)
 
         for entry in data:
             try:
                 record = HCMRecord(**entry)
                 validated_record = dict(record)
+                if record.field_13X in unique_id:
+                    continue
+                unique_id.append(record.field_13X)
                 # print(validated_record)
                 radio_station = RadioStation(**validated_record)
                 antenna = Antenna(**validated_record)
