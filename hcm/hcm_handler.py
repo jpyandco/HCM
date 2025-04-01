@@ -1,11 +1,13 @@
+from configparser import ConfigParser
 from datetime import datetime
 import json
 import os
+import time
 import zipfile
 
 from pydantic import ValidationError
 from db.database_handler import DatabaseHandler
-from hcm.const import FILEPREFIX
+from hcm.const import CONFIG, FILEPREFIX
 
 
 class HCMHandler:
@@ -13,8 +15,10 @@ class HCMHandler:
         self.db_handler = DatabaseHandler()
         self.incorrect_dataset = []
         self.file_headers = file_headers
+        self.config = ConfigParser()
+        self.config.read(CONFIG)
 
-        self.prefix_dir = "output/"
+        self.prefix_dir = self.config["Path"]["folder_path"] + "\\"
         self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
         self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
         self.report_file = self.dir_path + "/" + "Report.json"

@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from datetime import datetime
 import json
+import time
 from pydantic import ValidationError
 
 from db.database_handler import DatabaseHandler
@@ -16,6 +17,7 @@ class HCMHandlerNew(HCMHandler):
         super().__init__(file_headers)
 
     def process(self):
+        self.start_time = time.time()
         try:
             config = ConfigParser()
             config.read(CONFIG)
@@ -32,8 +34,9 @@ class HCMHandlerNew(HCMHandler):
                 file_name = self.get_file_name(entry)
                 result = self.db_handler.select_from_db(table)
                 # print("DB DATA:", result)
+
+                data = self.new_format(table, result)
                 headers = self.create_headers(file_name)
-                data = self.new_format(table, file_name, result)
                 complete_data = {"header": headers, "content": data}
                 # print("DATA: ", data)
                 self.write_to_file_new(file_name, complete_data)
@@ -50,6 +53,10 @@ class HCMHandlerNew(HCMHandler):
 
         except Exception as e:
             print(e)
+
+        self.end_time = time.time()
+        execution_time = self.end_time - self.start_time
+        print(f"Execution time: {execution_time} seconds")
 
     def new_format(self, table: str, data: list[dict]):
         # result = self.db_handler.select_from_db(table)

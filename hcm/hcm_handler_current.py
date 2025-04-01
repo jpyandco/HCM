@@ -1,11 +1,13 @@
 from configparser import ConfigParser
 from datetime import datetime
 import os
+import time
 import zipfile
 
 from pydantic import ValidationError
 from db.database_handler import DatabaseHandler
 from hcm.const import CONFIG, FILEPREFIX
+from hcm.hcm_handler import HCMHandler
 from hcm.model import Antenna, Coordination, HCMHeader, HCMRecord, RadioStation, ReceiverStation, Remarks
 import json
 
@@ -25,22 +27,24 @@ test_data = {
 }
 
 
-class HCMHandlerCurrent:
+class HCMHandlerCurrent(HCMHandler):
     def __init__(self, file_headers: dict) -> None:
-        self.db_handler = DatabaseHandler()
-        self.incorrect_dataset = []
-        self.file_headers = file_headers
+        super().__init__(file_headers)
+        # self.db_handler = DatabaseHandler()
+        # self.incorrect_dataset = []
+        # self.file_headers = file_headers
 
-        self.prefix_dir = "output/"
-        self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        self.report_file = self.dir_path + "/" + "Report.json"
-        self.total_records: int = 0
-        self.file_number: int = 0
+        # # self.prefix_dir = "output/"
+        # self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
+        # self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
+        # self.report_file = self.dir_path + "/" + "Report.json"
+        # self.total_records: int = 0
+        # self.file_number: int = 0
 
         # folder path, file name, zip name as init params from gui?
 
     def process(self):
+        self.start_time = time.time()
         try:
             config = ConfigParser()
             config.read(CONFIG)
@@ -69,6 +73,10 @@ class HCMHandlerCurrent:
 
         except Exception as e:
             print(e)
+
+        self.end_time = time.time()
+        execution_time = self.end_time - self.start_time
+        print(f"Execution time: {execution_time} seconds")
 
     def write_to_file(self, file_name, input):
 
