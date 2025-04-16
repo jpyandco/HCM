@@ -1,7 +1,7 @@
 from db.database_handler import DatabaseHandler
 from hcm.hcm_handler_current import HCMHandlerCurrent
 from hcm.hcm_handler_new import HCMHandlerNew
-from hcm.model import HCMCustomizableHeaders
+from hcm.model import HCMCustomizableHeaders, HCMRecord
 
 
 # db_handler = DatabaseHandler()
@@ -59,16 +59,53 @@ sample = {
     "coveragearea": "Macro",
 }
 
+sample_dic = {
+    "1a": 5000,
+    "xx": "M",
+    "1z": 1,
+    "6a": "FB",
+    "6b": "CP",
+    "6z": "L",
+    "10z": 1,
+    "2c": "12345678",
+    "4a": "Field 4A",
+    "4b": "123",
+    "4c": "123E456789N1234",
+    "4d": 0,
+    "4z": 0,
+    "7a": "1234567",
+    "8b1": 500,
+    "8b2": "I",
+    "9a": 359,
+    "9b": None,
+    "9d": "M",
+    "9g": 50,
+    "9y": 9999,
+    "9xh": "1234567",
+    "9xv": "1234567",
+    "1y": 50000,
+    "xxx": "M",
+    "13z": "Field 13Z",
+    "13y": "B",
+    "2w": "12345678",
+    "2z": "12345678",
+    "13x": "AUT123456789012",
+    "userlabel": "User Label",
+}
 
-headers = HCMCustomizableHeaders(
-    person="Joe Heinz",
-    phone="",
-    email="bobo@drei.com",
-    fax="",
-)
 
-hcm_handler = HCMHandlerNew(headers.model_dump())
-hcm_handler.process()
+# headers = HCMCustomizableHeaders(
+#     person="Joe Heinz",
+#     phone="",
+#     email="bobo@drei.com",
+#     fax="",
+# )
+
+# hcm_handler = HCMHandlerNew(headers.model_dump())
+# hcm_handler.process()
+
+record = HCMRecord(**sample_dic)
+print(record.field_9XH)
 # data = hcm_handler.new_format("TEST", "smacho", [sample])
 # print(data)
 # hcm_handler.write_to_file_new("NEW_JSON.json", data)

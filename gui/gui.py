@@ -112,13 +112,17 @@ class GUI:
             fax=self.fax_entry.get(),
         )
         hcm_handler = HCMHandlerCurrent(headers.model_dump())
-        self.progress_label = ttk.Label(self.root, text="File creation started!")
-        self.progress_label.grid(row=8, column=1, pady=5)
+        # self.progress_label = ttk.Label(self.root, text="File creation started!")
+        # self.progress_label.grid(row=8, column=1, pady=5)
         hcm_handler.process()
         if hcm_handler.incorrect_dataset:
-            self.progress_label = ttk.Label(self.root, text="File creation finished with errors!")
+            self.progress_label = ttk.Label(
+                self.root, text=f"File creation finished with {len(hcm_handler.incorrect_dataset)} errors!"
+            ).grid(row=9, column=0, pady=5)
         else:
-            self.progress_label = ttk.Label(self.root, text="File creation finished successfully!")
+            self.progress_label = ttk.Label(self.root, text="File creation finished successfully!").grid(
+                row=9, column=0, pady=5
+            )
 
     def button_file_creation_new(self):
         thread = threading.Thread(target=self.start_file_creation_new())

@@ -28,15 +28,10 @@ def test_create_file_wrong_data_format():
         assert isinstance(e, AttributeError)
 
 
-def test_create_file_missing_fieldss():
+def test_create_file_missing_fields():
 
     result = handler_new.new_format(table, missing_sample)
     assert len(handler_new.incorrect_dataset) > 0
-    # except Exception as e:
-    #     assert isinstance(e, ValidationError)
-
-
-# assert result
 
 
 def test_header_creation_error():
