@@ -30,18 +30,6 @@ test_data = {
 class HCMHandlerCurrent(HCMHandler):
     def __init__(self, file_headers: dict) -> None:
         super().__init__(file_headers)
-        # self.db_handler = DatabaseHandler()
-        # self.incorrect_dataset = []
-        # self.file_headers = file_headers
-
-        # # self.prefix_dir = "output/"
-        # self.dir_path = self.prefix_dir + FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        # self.dir = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        # self.report_file = self.dir_path + "/" + "Report.json"
-        # self.total_records: int = 0
-        # self.file_number: int = 0
-
-        # folder path, file name, zip name as init params from gui?
 
     def process(self):
         self.start_time = time.time()
@@ -59,7 +47,10 @@ class HCMHandlerCurrent(HCMHandler):
             # pass file_numer to create_file for multiproc
             for table, entry in zip(tables, tech):
                 file_name = self.get_file_name(entry)
-                data = self.create_file(table, file_name)
+                result = self.db_handler.select_from_db(table)
+                data = self.create_file(table, result)
+                headers = self.create_headers(file_name)
+                data = headers + data
                 self.write_to_file(file_name, data)
 
             incorrect_data = self.incorrect_dataset
@@ -80,11 +71,8 @@ class HCMHandlerCurrent(HCMHandler):
 
     def write_to_file(self, file_name, input):
 
-        # directory_path = FILEPREFIX + self.get_current_quarter() + str(datetime.now().year)
-        # folder = self.prefix_dir + self.dir
-
         folder = self.dir_path + "/"
-        # filename = "basemodel_test"
+        print(f"PATH {folder}{file_name}")
         with open(folder + file_name, "w") as file:
             file.write(input)
 
@@ -107,24 +95,24 @@ class HCMHandlerCurrent(HCMHandler):
 
         return name
 
-    def create_file(self, table: str, file_name: str) -> str:
+    def create_file(self, table: str, data: list[dict]) -> str:
         """For multiprocessing. Handles the actual file processing/creation."""
 
-        result = self.db_handler.select_from_db(table)
-        data = ""
-        record_count = 0
+        # result = self.db_handler.select_from_db(table)
+        validated_data = ""
+        self.record_count = 0
         self.file_number += 1
         unique_id = []
 
         try:
-            for entry in result:
+            for entry in data:
                 record = HCMRecord(**entry)
                 if record.field_13X in unique_id:
                     continue
                 unique_id.append(record.field_13X)
-                data += "\n" + record.serialize_model()  # "\n" + for testing, to make files more readable
+                validated_data += record.serialize_model()  # "\n" +
                 self.total_records += 1
-                record_count += 1
+                self.record_count += 1
 
         except ValidationError as e:
             lst = self.format_exception(e)
@@ -136,22 +124,18 @@ class HCMHandlerCurrent(HCMHandler):
             print(e)
             print(f"Error for userlabel: {entry.get("userlabel")} in Table {table}")
 
+        return validated_data
+
+    def create_headers(self, file_name):
         headers = self.file_headers
-        headers["record_count"] = record_count
+        headers["record_count"] = self.record_count
         headers["creation_date"] = datetime.now().strftime("%d%m%Y")
         headers["filenumber_medium"] = self.file_number
         headers["filecontent"] = file_name
 
-        print(headers)
-
         header = HCMHeader(**headers)
         header = header.serialize_model()
-
-        print(headers)
-
-        # return header + data & incorrect_dataset? better for multiproc
-        # return {data: header + data, incorrect_dataset: incorrect_dataset}
-        return header + data
+        return header
 
     def create_dir(self, directory_path):
         # directory_path = FILEPREFIX + self.get_current_quarter() + datetime.now().year
