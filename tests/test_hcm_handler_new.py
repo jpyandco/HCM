@@ -1,4 +1,6 @@
 from pydantic import ValidationError
+import pytest
+from hcm.hcm_handler_current import HCMHandlerCurrent
 from hcm.hcm_handler_new import HCMHandlerNew
 from hcm.model import HCMHeader
 from mock_data import *
@@ -21,11 +23,8 @@ def test_create_file_correct_json():
 
 
 def test_create_file_wrong_data_format():
-    try:
+    with pytest.raises(AttributeError):
         result = handler_new.new_format(table, sample)
-
-    except Exception as e:
-        assert isinstance(e, AttributeError)
 
 
 def test_create_file_missing_fields():
@@ -35,10 +34,10 @@ def test_create_file_missing_fields():
 
 
 def test_header_creation_error():
-    try:
-        handler_new.create_headers(file_name)
-    except Exception as e:
-        assert isinstance(e, ValidationError)
+    handler = HCMHandlerCurrent(headers)
+    handler.record_count = None
+    with pytest.raises(ValidationError):
+        result = handler.create_headers(file_name)
 
 
 def test_header_creation():
