@@ -69,9 +69,6 @@
           {
             "type": "object",
             "properties": {
-              "variant2": {
-                "type": "string"
-              },
               "radio_station": {
                 "type": "object",
                 "properties": {
@@ -249,7 +246,6 @@
               }
             },
             "required": [
-              "variant2",
               "radio_station",
               "antenna",
               "reciever_station",
