@@ -93,7 +93,7 @@
                 "channel_occupancy": {
                   "type": "string"
                 },
-                "commissoning_date": {
+                "commissioning_date": {
                   "type": "string"
                 },
                 "station_name": {
@@ -138,7 +138,7 @@
                 "service_type",
                 "user_category",
                 "channel_occupancy",
-                "commissoning_date",
+                "commissioning_date",
                 "station_name",
                 "country",
                 "coordinates",
@@ -175,7 +175,7 @@
                 "type_vertical"
               ]
             },
-            "reciever_station": {
+            "receiver_station": {
               "type": "object",
               "properties": {
                 "transmission_frequency": {
@@ -248,7 +248,7 @@
           "required": [
             "radio_station",
             "antenna",
-            "reciever_station",
+            "receiver_station",
             "remarks",
             "coordination"
           ]
